@@ -1,7 +1,7 @@
 import os
 
 users = [
-    ["admin", "admin123", "Administrator", 30, "081234567890", "admin@nugrah.com", "admin"]
+    ["admin", "admin123", "Administrator", 30, "081234567890", "admin@nugrah.my.id", "admin"]
 ]
 
 sudah_login = False
