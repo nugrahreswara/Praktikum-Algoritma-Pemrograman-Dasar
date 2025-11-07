@@ -1,19 +1,19 @@
 import sys
-from data_users import users
+from data_pengguna import pengguna
 
-sudah_login = False
-user_sekarang = None
+_sudah_login = False
+_pengguna_sekarang = None
 
 def login():
-    global sudah_login, user_sekarang
+    global _sudah_login, _pengguna_sekarang
     maks_percobaan = 5
     percobaan = 0
     while percobaan < maks_percobaan:
         username = input("Masukkan username: ").strip()
         password = input("Masukkan password: ").strip()
-        if username in users and users[username]["password"] == password:
-            sudah_login = True
-            user_sekarang = username
+        if username in pengguna and pengguna[username]["password"] == password:
+            _sudah_login = True
+            _pengguna_sekarang = username
             print("Login berhasil!")
             input("Tekan Enter untuk melanjutkan...")
             return True
@@ -27,14 +27,14 @@ def login():
     return False
 
 def logout():
-    global sudah_login, user_sekarang
-    sudah_login = False
-    user_sekarang = None
+    global _sudah_login, _pengguna_sekarang
+    _sudah_login = False
+    _pengguna_sekarang = None
     print("Anda telah logout.")
     input("Tekan Enter untuk kembali...")
 
-def is_logged_in():
-    return sudah_login
+def sudah_login():
+    return _sudah_login
 
-def get_current_user():
-    return user_sekarang
+def dapatkan_pengguna_sekarang():
+    return _pengguna_sekarang

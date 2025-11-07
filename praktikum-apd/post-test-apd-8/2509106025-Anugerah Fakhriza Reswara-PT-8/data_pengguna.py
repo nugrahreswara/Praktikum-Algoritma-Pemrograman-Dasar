@@ -1,4 +1,4 @@
-users = {
+pengguna = {
     "admin": {
         "password": "admin",
         "nama_lengkap": "Administrator",

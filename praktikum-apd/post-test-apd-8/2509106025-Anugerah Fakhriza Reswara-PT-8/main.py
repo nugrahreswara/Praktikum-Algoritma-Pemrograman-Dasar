@@ -1,28 +1,27 @@
-from autentikasi import login, logout, is_logged_in, get_current_user
-from tampilan import tampilkan_menu_utama, tampilkan_menu_user, tampilkan_daftar_user
-from manajemen_user import (
-    tambah_user, hapus_user, edit_profil,
-    user_ada, get_user, get_all_users
+from autentikasi import login, logout, sudah_login, dapatkan_pengguna_sekarang
+from antarmuka import tampilkan_menu_utama, tampilkan_menu_pengguna, tampilkan_daftar_pengguna, bersihkan_layar
+from manajemen_pengguna import (
+    tambah_pengguna, hapus_pengguna, perbarui_profil_pengguna,
+    pengguna_ada, dapatkan_data_pengguna, dapatkan_semua_pengguna
 )
-from validasi_input import validasi_email, validasi_umur
-from data_users import users
+from validasi import validasi_email, validasi_umur
+from data_pengguna import pengguna
 import sys
 
-def registrasi():
-    print("\n=== REGISTRASI USER BARU ===")
-    username_baru = input("Masukkan username baru: ").strip()
-    if not username_baru:
+def daftar_pengguna_baru():
+    print("\n=== REGISTRASI PENGGUNA BARU ===")
+    username = input("Masukkan username baru: ").strip()
+    if not username:
         print("Username tidak boleh kosong.")
         input("Tekan Enter untuk kembali...")
         return
-
-    if user_ada(username_baru):
+    if pengguna_ada(username):
         print("Username sudah digunakan.")
         input("Tekan Enter untuk kembali...")
         return
 
-    password_baru = input("Masukkan password: ").strip()
-    if not password_baru:
+    password = input("Masukkan password: ").strip()
+    if not password:
         print("Password tidak boleh kosong.")
         input("Tekan Enter untuk kembali...")
         return
@@ -51,35 +50,35 @@ def registrasi():
         input("Tekan Enter untuk kembali...")
         return
 
-    tambah_user(username_baru, password_baru, nama_lengkap, umur, no_telp, email, "user")
+    tambah_pengguna(username, password, nama_lengkap, umur, no_telp, email, "user")
     print("Registrasi berhasil! Silakan login.")
     input("Tekan Enter untuk kembali...")
 
-def menu_user_biasa():
-    current = get_current_user()
-    data_user = get_user(current)
+def menu_pengguna_biasa():
+    username = dapatkan_pengguna_sekarang()
+    data = dapatkan_data_pengguna(username)
     while True:
-        tampilkan_menu_user()
+        tampilkan_menu_pengguna()
         pilihan = input("Pilih menu: ").strip()
         if pilihan == "1":
             print("\n=== EDIT PROFIL ===")
             print("Biarkan kosong jika tidak ingin mengubah.")
-            nama_baru = input(f"Nama lengkap ({data_user['nama_lengkap']}): ").strip() or None
-            umur_baru_str = input(f"Umur ({data_user['umur']}): ").strip()
-            umur_baru = validasi_umur(umur_baru_str) if umur_baru_str else None
-            if umur_baru_str and umur_baru is None:
+            nama_baru = input(f"Nama lengkap ({data['nama_lengkap']}): ").strip() or None
+            teks_umur = input(f"Umur ({data['umur']}): ").strip()
+            umur_baru = validasi_umur(teks_umur) if teks_umur else None
+            if teks_umur and umur_baru is None:
                 print("Umur tidak valid.")
                 input("Tekan Enter untuk kembali...")
                 continue
-            telp_baru = input(f"Nomor telepon ({data_user['no_telp']}): ").strip() or None
-            email_baru = input(f"Email ({data_user['email']}): ").strip() or None
+            telp_baru = input(f"Nomor telepon ({data['no_telp']}): ").strip() or None
+            email_baru = input(f"Email ({data['email']}): ").strip() or None
             if email_baru and not validasi_email(email_baru):
                 print("Format email tidak valid.")
                 input("Tekan Enter untuk kembali...")
                 continue
             password_baru = input("Password baru (kosongkan jika tidak ingin ganti): ").strip() or None
 
-            edit_profil(current, nama_baru, umur_baru, telp_baru, email_baru, password_baru)
+            perbarui_profil_pengguna(username, nama_baru, umur_baru, telp_baru, email_baru, password_baru)
             print("Profil berhasil diperbarui.")
             input("Tekan Enter untuk kembali...")
 
@@ -94,18 +93,18 @@ def menu_user_biasa():
             input("Tekan Enter untuk kembali...")
 
 def menu_admin():
-    current = get_current_user()
+    username = dapatkan_pengguna_sekarang()
     while True:
-        tampilkan_menu_user()
+        tampilkan_menu_pengguna()
         pilihan = input("Pilih menu: ").strip()
-        if pilihan == "1":
-            print("\n=== TAMBAH USER BARU (ADMIN) ===")
+        if pilihan == "1":  # Tambah pengguna
+            print("\n=== TAMBAH PENGGUNA BARU (ADMIN) ===")
             username_baru = input("Username: ").strip()
             if not username_baru:
                 print("Username tidak boleh kosong.")
                 input("Tekan Enter untuk kembali...")
                 continue
-            if user_ada(username_baru):
+            if pengguna_ada(username_baru):
                 print("Username sudah digunakan.")
                 input("Tekan Enter untuk kembali...")
                 continue
@@ -140,46 +139,46 @@ def menu_admin():
                 input("Tekan Enter untuk kembali...")
                 continue
 
-            tambah_user(username_baru, password_baru, nama_lengkap, umur, no_telp, email, "user")
-            print("User berhasil ditambahkan.")
+            tambah_pengguna(username_baru, password_baru, nama_lengkap, umur, no_telp, email, "user")
+            print("Pengguna berhasil ditambahkan.")
             input("Tekan Enter untuk kembali...")
 
-        elif pilihan == "2":
+        elif pilihan == "2":  # Hapus pengguna
             target = input("\nUsername yang akan dihapus: ").strip()
             if target == "admin":
                 print("Tidak bisa menghapus akun admin utama.")
-            elif not user_ada(target):
-                print("User tidak ditemukan.")
-            elif get_user(target)["role"] == "admin":
+            elif not pengguna_ada(target):
+                print("Pengguna tidak ditemukan.")
+            elif dapatkan_data_pengguna(target)["role"] == "admin":
                 print("Tidak bisa menghapus admin lain.")
             else:
-                hapus_user(target)
-                print("User berhasil dihapus.")
+                hapus_pengguna(target)
+                print("Pengguna berhasil dihapus.")
             input("Tekan Enter untuk kembali...")
 
-        elif pilihan == "3":
-            tampilkan_daftar_user()
+        elif pilihan == "3":  # Lihat daftar
+            tampilkan_daftar_pengguna()
 
-        elif pilihan == "4":
-            data_user = get_user(current)
+        elif pilihan == "4":  # Edit profil
+            data = dapatkan_data_pengguna(username)
             print("\n=== EDIT PROFIL ===")
             print("Biarkan kosong jika tidak ingin mengubah.")
-            nama_baru = input(f"Nama lengkap ({data_user['nama_lengkap']}): ").strip() or None
-            umur_baru_str = input(f"Umur ({data_user['umur']}): ").strip()
-            umur_baru = validasi_umur(umur_baru_str) if umur_baru_str else None
-            if umur_baru_str and umur_baru is None:
+            nama_baru = input(f"Nama lengkap ({data['nama_lengkap']}): ").strip() or None
+            teks_umur = input(f"Umur ({data['umur']}): ").strip()
+            umur_baru = validasi_umur(teks_umur) if teks_umur else None
+            if teks_umur and umur_baru is None:
                 print("Umur tidak valid.")
                 input("Tekan Enter untuk kembali...")
                 continue
-            telp_baru = input(f"Nomor telepon ({data_user['no_telp']}): ").strip() or None
-            email_baru = input(f"Email ({data_user['email']}): ").strip() or None
+            telp_baru = input(f"Nomor telepon ({data['no_telp']}): ").strip() or None
+            email_baru = input(f"Email ({data['email']}): ").strip() or None
             if email_baru and not validasi_email(email_baru):
                 print("Format email tidak valid.")
                 input("Tekan Enter untuk kembali...")
                 continue
             password_baru = input("Password baru (kosongkan jika tidak ingin ganti): ").strip() or None
 
-            edit_profil(current, nama_baru, umur_baru, telp_baru, email_baru, password_baru)
+            perbarui_profil_pengguna(username, nama_baru, umur_baru, telp_baru, email_baru, password_baru)
             print("Profil berhasil diperbarui.")
             input("Tekan Enter untuk kembali...")
 
@@ -193,15 +192,16 @@ def menu_admin():
             print("Pilihan tidak valid.")
             input("Tekan Enter untuk kembali...")
 
+# Program Utama
 if __name__ == "__main__":
     while True:
-        if not is_logged_in():
+        if not sudah_login():
             tampilkan_menu_utama()
             pilihan = input("Pilih menu (1/2/3): ").strip()
             if pilihan == "1":
                 login()
             elif pilihan == "2":
-                registrasi()
+                daftar_pengguna_baru()
             elif pilihan == "3":
                 print("Terima kasih telah menggunakan program ini.")
                 break
@@ -209,9 +209,9 @@ if __name__ == "__main__":
                 print("Pilihan tidak valid.")
                 input("Tekan Enter untuk kembali...")
         else:
-            current = get_current_user()
-            role = get_user(current)["role"]
+            username = dapatkan_pengguna_sekarang()
+            role = dapatkan_data_pengguna(username)["role"]
             if role == "admin":
                 menu_admin()
             else:
-                menu_user_biasa()
+                menu_pengguna_biasa()
